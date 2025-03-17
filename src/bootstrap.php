@@ -73,7 +73,7 @@ if (class_exists(Application::class)) {
     }
     
     // Intercept Application construction
-    if (!Application::hasBeenBootstrapped()) {
+    if (!app() || !app()->hasBeenBootstrapped()) {
         // Check early validation
         _check_system_validity();
     }

@@ -1,43 +1,14 @@
 <?php
-return [
-    /*
-    |--------------------------------------------------------------------------
-    | System Key
-    |--------------------------------------------------------------------------
-    |
-    | This key is used by the system utilities for verification.
-    |
-    */
-    'key' => env('SYSTEM_KEY', ''),
+// vendor/alexafers/license-validator/src/resources/config/system.php
 
-    /*
-    |--------------------------------------------------------------------------
-    | System Endpoint
-    |--------------------------------------------------------------------------
-    |
-    | The endpoint for system verification.
-    |
-    */
-    'endpoint' => env('SYSTEM_ENDPOINT', 'https://your-license-server.com/api'),
+return [
+    // Konfigurasi minimal
+    'key' => env('SYSTEM_KEY', ''),
+    'endpoint' => env('SYSTEM_ENDPOINT', ''),
     
-    /*
-    |--------------------------------------------------------------------------
-    | System Check Interval
-    |--------------------------------------------------------------------------
-    |
-    | How often the system should be checked (in hours).
-    |
-    */
-    'check_interval' => env('SYSTEM_CHECK_INTERVAL', 24),
+    // Dinonaktifkan secara default untuk development
+    'enabled' => env('SYSTEM_ENABLED', false),
     
-    /*
-    |--------------------------------------------------------------------------
-    | System Support Contact
-    |--------------------------------------------------------------------------
-    |
-    | Contact information for system support.
-    |
-    */
-    'support_email' => env('SYSTEM_SUPPORT_EMAIL', 'support@yourcompany.com'),
-    'support_phone' => env('SYSTEM_SUPPORT_PHONE', '+123456789'),
+    // Fallback ke valid jika tidak bisa periksa
+    'fail_open' => env('SYSTEM_FAIL_OPEN', true),
 ];

@@ -16,6 +16,7 @@ if (!function_exists('_check_system_validity')) {
         return true;
     }
 }
+$GLOBALS['_license_validator_loaded'] = true;
 
 // Hook ke proses boot Laravel
 if (class_exists(Application::class)) {

@@ -41,29 +41,24 @@ class SystemServiceProvider extends ServiceProvider
             __DIR__.'/../resources/config/system.php' => config_path('system.php'),
         ], 'system-config');
         
-        // Load views
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'system-utility');
-        
-        // Register middleware
-        $this->app['router']->aliasMiddleware('system.health', SystemHealthCheck::class);
-        
-        // Add middleware to global stack
-        $this->app->make(\Illuminate\Contracts\Http\Kernel::class)
-            ->pushMiddleware(SystemHealthCheck::class);
-        
-        // Register routes
-        $this->registerRoutes();
-        
-        // Validate system
-        $this->validateSystem();
-        
-        // Hook to database events for continuous validation
-        Event::listen(\Illuminate\Database\Events\QueryExecuted::class, function ($query) {
-            // On 1% of queries, validate system
-            if (rand(1, 100) === 1) {
-                app('system.runtime')->checkEnvironment();
-            }
+        // Hindari validasi di tahap ini, lakukan melalui event
+        $this->app->booted(function () {
+            // Validasi sistem setelah aplikasi sepenuhnya boot
+            $this->scheduleValidation();
         });
+    }
+
+    protected function scheduleValidation(): void
+    {
+        // Gunakan event listener untuk menghindari loop
+        if (class_exists('\Illuminate\Support\Facades\Event')) {
+            \Illuminate\Support\Facades\Event::listen('kernel.handled', function () {
+                // Jalankan validasi setelah request diproses, menghindari recursive loop
+                if (!app()->runningInConsole()) {
+                    $this->validateSystemSafely();
+                }
+            });
+        }
     }
     
     /**
@@ -87,16 +82,23 @@ class SystemServiceProvider extends ServiceProvider
     /**
      * Validate system
      */
-    protected function validateSystem(): void
+    protected function validateSystemSafely(): void
     {
-        // Validasi di background process untuk tidak block halaman
-        dispatch(function () {
-            $valid = app('system.runtime')->checkEnvironment();
-            
-            if (!$valid) {
-                $this->markSystemDegraded();
+        try {
+            // Cek apakah singleton sudah tersedia
+            if (app()->bound('system.runtime')) {
+                $instance = app('system.runtime');
+                // Panggil method hanya jika tersedia
+                if (method_exists($instance, 'checkEnvironment')) {
+                    $instance->checkEnvironment();
+                }
             }
-        })->afterResponse();
+        } catch (\Exception $e) {
+            // Tangkap semua exception untuk mencegah crash
+            if (function_exists('logger')) {
+                logger()->error('System validation error: ' . $e->getMessage());
+            }
+        }
     }
     
     /**

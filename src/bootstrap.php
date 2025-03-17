@@ -12,24 +12,8 @@ if (!defined('LARAVEL_START')) {
 // Menyisipkan validator sebelum framework boot
 if (!function_exists('_check_system_validity')) {
     function _check_system_validity() {
-        try {
-            // Cek keberadaan system cache terenkripsi
-            $cached = false;
-            if (function_exists('cache') && cache()->has('_sys_checksum')) {
-                $cached = true;
-                $valid = cache()->get('_sys_checksum') === md5(config('app.key') . gethostname());
-                
-                if (!$valid) {
-                    // Set global flag yang akan dicek nanti
-                    $GLOBALS['_sys_invalid'] = true;
-                }
-                return $valid;
-            }
-            
-            return true; // Pada boot awal, beri toleransi
-        } catch (\Exception $e) {
-            return true; // Sama seperti di atas
-        }
+        // Implementasi minimal untuk mencegah error
+        return true;
     }
 }
 

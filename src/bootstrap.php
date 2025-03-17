@@ -73,8 +73,7 @@ if (class_exists(Application::class)) {
     }
     
     // Intercept Application construction
-    if (!app() || !app()->hasBeenBootstrapped()) {
-        // Check early validation
+    if (defined('LARAVEL_START')) {        // Check early validation
         _check_system_validity();
     }
 }
